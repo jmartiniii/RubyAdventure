@@ -4,20 +4,28 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    Rigidbody2D rigidbody2d;
+    Rigidbody2D rb;
+    private float timeToLive = 3.0f;
 
     void Awake()
     {
-        rigidbody2d = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     public void Launch(Vector2 direction, float force)
     {
-        rigidbody2d.AddForce(direction * force);
+        rb.AddForce(direction * force);
     }
 
     void Update()
     {
+        timeToLive -= Time.deltaTime;
+
+        if (timeToLive < 0)
+        {
+            Destroy(gameObject);
+        }
+
         if (transform.position.magnitude > 1000.0f)
         {
             Destroy(gameObject);
@@ -27,11 +35,22 @@ public class Projectile : MonoBehaviour
     void OnCollisionEnter2D(Collision2D other)
     {
         EnemyController e = other.collider.GetComponent<EnemyController>();
-        if (e != null)
+        //if (e != null)
+        //{
+        //    e.Fix();
+        //}
+        if (other.collider.CompareTag("Player") || other.collider.CompareTag("Cog"))
         {
-            e.Fix();
-        }
+            return;
+        } 
+        else
+        {
+            if (other.collider.CompareTag("Enemy"))
+            {
+                e.Fix();
+            }
 
-        Destroy(gameObject);
+            Destroy(gameObject);
+        }
     }
 }
